@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io/fs"
 	"log/slog"
 	"mdsite/doc"
@@ -21,8 +22,15 @@ func run() error {
 	inDir := flag.String("in", "src", "input directory")
 	outDir := flag.String("out", "dist", "output directory")
 	headPath := flag.String("head", "", "head file")
+	showHelp := flag.Bool("help", false, "show usage")
 
+	flag.Usage = usage
 	flag.Parse()
+
+	if *showHelp {
+		flag.Usage()
+		return nil
+	}
 
 	slog.Info("args", "in", *inDir, "out", *outDir, "head", *headPath)
 
@@ -68,6 +76,14 @@ func run() error {
 
 		return os.WriteFile(outFile, html, 0644)
 	})
+}
+
+func usage() {
+	fmt.Fprintf(
+		flag.CommandLine.Output(),
+		"Usage: %s [flags]\n\nRenders Markdown pages to HTML.\n\nFlags:\n",
+		filepath.Base(os.Args[0]))
+	flag.PrintDefaults()
 }
 
 func outPath(inDir, outDir, path string) string {
